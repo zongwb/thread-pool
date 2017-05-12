@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	tb "git.garena.com/gocommon/TokenBucket"
+	tb "github.com/zongwb/tokenbucket"
 )
 
 const (
