@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	tb "git.garena.com/gocommon/TokenBucket"
+	tb "github.com/zongwb/tokenbucket"
 )
 
 func TestMain(m *testing.M) {
