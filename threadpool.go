@@ -20,16 +20,19 @@ const (
 	_stopping
 )
 
+// Job is the generic task to be performed by threadpool.
 type Job interface {
 	Process() (err error)
 	String() string
 }
 
+// CancellableJob is a Job which is checked for status before invoking its Process.
 type CancellableJob interface {
 	Job
 	Cancelled() bool
 }
 
+// ThreadPool defines a thread pool.
 type ThreadPool interface {
 	Run() error
 	Stop() error
@@ -40,10 +43,12 @@ type ThreadPool interface {
 	PendingJobs() int
 }
 
+// NewThreadPool creates an TheadPool instance.
 func NewThreadPool(maxworkers uint32, queuesize uint32, limiter tb.RateLimiter) ThreadPool {
 	return newDispatcher(maxworkers, queuesize, limiter)
 }
 
+// dispatcher implements ThreadPool.
 type dispatcher struct {
 	sync.Mutex
 	jobQueue   chan Job // from the task driver
@@ -203,7 +208,7 @@ func (d *dispatcher) Wait() error {
 	return nil
 }
 
-// Post sends a job to the threadpool and block if queue is full.
+// BPost sends a job to the threadpool and block if queue is full.
 func (d *dispatcher) BPost(job Job) error {
 	if d == nil {
 		return errors.New("Empty dispatcher")
