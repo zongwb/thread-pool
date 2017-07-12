@@ -1,7 +1,6 @@
 package threadpool
 
 import (
-	"log"
 	"sync"
 )
 
@@ -20,32 +19,16 @@ func NewWorker(c <-chan Job, wg *sync.WaitGroup) *Worker {
 // Start starts the worker goroutine.
 func (w *Worker) Start() {
 	go func() {
-		done := false
 		for {
-			if done {
+			select {
+			case job := <-w.jobChan:
+				// must process the job synchronously
+				job.Process()
+			case <-w.quit:
+				// signal to the dispatcher
+				w.wg.Done()
 				return
 			}
-			// Enclose processing in a function so as to recover from panic
-			func() {
-				defer func() {
-					err := recover()
-					if err != nil {
-						log.Println("Error in worker thread, recovered from ", err)
-					}
-				}()
-
-				select {
-				case job := <-w.jobChan:
-					// must process the job synchronously
-					job.Process()
-				case <-w.quit:
-					// signal to the dispatcher
-					w.wg.Done()
-					// signal the goroutine
-					done = true
-					return
-				}
-			}()
 		}
 	}()
 }
